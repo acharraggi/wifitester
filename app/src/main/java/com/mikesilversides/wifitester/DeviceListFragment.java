@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example.android.wifidirect;
+package com.mikesilversides.wifitester;
 
 import android.app.ListFragment;
 import android.app.ProgressDialog;

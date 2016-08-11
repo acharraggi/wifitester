@@ -4,7 +4,7 @@ android {
     buildToolsVersion '23.0.0'
 
     defaultConfig {
-        applicationId "com.example.android.wifidirect"
+        applicationId "com.mikesilversides.wifitester"
         minSdkVersion 14
         targetSdkVersion 19
     }
