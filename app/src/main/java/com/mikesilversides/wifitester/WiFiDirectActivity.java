@@ -47,7 +47,7 @@ import com.mikesilversides.wifitester.DeviceListFragment.DeviceActionListener;
  */
 public class WiFiDirectActivity extends Activity implements ChannelListener, DeviceActionListener {
 
-    public static final String TAG = "wifidirectdemo";
+    public static final String TAG = "wifitester";
     private WifiP2pManager manager;
     private boolean isWifiP2pEnabled = false;
     private boolean retryChannel = false;
