@@ -57,15 +57,25 @@ public class FileTransferService extends IntentService {
 
                 Log.d(WiFiDirectActivity.TAG, "Client socket - " + socket.isConnected());
                 OutputStream stream = socket.getOutputStream();
+                InputStream instream = socket.getInputStream();
                 ContentResolver cr = context.getContentResolver();
-                InputStream is = null;
-                try {
-                    is = cr.openInputStream(Uri.parse(fileUri));
-                } catch (FileNotFoundException e) {
-                    Log.d(WiFiDirectActivity.TAG, e.toString());
-                }
-                DeviceDetailFragment.copyFile(is, stream);
+//                InputStream is = null;
+//                try {
+//                    is = cr.openInputStream(Uri.parse(fileUri));
+//                } catch (FileNotFoundException e) {
+//                    Log.d(WiFiDirectActivity.TAG, e.toString());
+//                }
+//                DeviceDetailFragment.copyFile(is, stream);
+                long startTime = System.currentTimeMillis();
+                DeviceDetailFragment.sendPing(stream);
                 Log.d(WiFiDirectActivity.TAG, "Client: Data written");
+
+                DeviceDetailFragment.getPong(instream);
+                Log.d(WiFiDirectActivity.TAG, "Client: Data received");
+                long endTime = System.currentTimeMillis();
+                Log.d(WiFiDirectActivity.TAG, "ping time: "+(endTime-startTime)+"ms");
+                //TODO: display this in client, stop server from disconnecting so client can ping again.
+
             } catch (IOException e) {
                 Log.e(WiFiDirectActivity.TAG, e.getMessage());
             } finally {

@@ -35,6 +35,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.nio.charset.StandardCharsets;
+
 import com.mikesilversides.wifitester.DeviceListFragment.DeviceActionListener;
 
 import java.io.File;
@@ -105,11 +107,18 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
                     @Override
                     public void onClick(View v) {
-                        // Allow user to pick an image from Gallery or other
-                        // registered apps
-                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                        intent.setType("image/*");
-                        startActivityForResult(intent, CHOOSE_FILE_RESULT_CODE);
+                        // do Ping
+                        Intent serviceIntent = new Intent(getActivity(), FileTransferService.class);
+                        serviceIntent.setAction(FileTransferService.ACTION_SEND_FILE);
+                        serviceIntent.putExtra(FileTransferService.EXTRAS_FILE_PATH, "");
+                        serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_ADDRESS,
+                                info.groupOwnerAddress.getHostAddress());
+                        serviceIntent.putExtra(FileTransferService.EXTRAS_GROUP_OWNER_PORT, 8988);
+                        getActivity().startService(serviceIntent);
+// old code:
+//                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//                        intent.setType("image/*");
+//                        startActivityForResult(intent, CHOOSE_FILE_RESULT_CODE);
                     }
                 });
 
@@ -222,25 +231,33 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 
         @Override
         protected String doInBackground(Void... params) {
+            String s = null;
             try {
                 ServerSocket serverSocket = new ServerSocket(8988);
                 Log.d(WiFiDirectActivity.TAG, "Server: Socket opened");
                 Socket client = serverSocket.accept();
                 Log.d(WiFiDirectActivity.TAG, "Server: connection done");
-                final File f = new File(Environment.getExternalStorageDirectory() + "/"
-                        + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis()
-                        + ".jpg");
+//                final File f = new File(Environment.getExternalStorageDirectory() + "/"
+//                        + context.getPackageName() + "/wifip2pshared-" + System.currentTimeMillis()
+//                        + ".jpg");
 
-                File dirs = new File(f.getParent());
-                if (!dirs.exists())
-                    dirs.mkdirs();
-                f.createNewFile();
+//                File dirs = new File(f.getParent());
+//                if (!dirs.exists())
+//                    dirs.mkdirs();
+//                f.createNewFile();
 
-                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
+//                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
                 InputStream inputstream = client.getInputStream();
-                copyFile(inputstream, new FileOutputStream(f));
+//                copyFile(inputstream, new FileOutputStream(f));
+                s = getPing(inputstream);
+
+                OutputStream outputstream = client.getOutputStream();
+                sendPong(outputstream);
+
                 serverSocket.close();
-                return f.getAbsolutePath();
+
+                return s;
+//                return f.getAbsolutePath();
             } catch (IOException e) {
                 Log.e(WiFiDirectActivity.TAG, e.getMessage());
                 return null;
@@ -254,11 +271,11 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         @Override
         protected void onPostExecute(String result) {
             if (result != null) {
-                statusText.setText("File copied - " + result);
-                Intent intent = new Intent();
-                intent.setAction(android.content.Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.parse("file://" + result), "image/*");
-                context.startActivity(intent);
+                statusText.setText("text received: " + result);
+//                Intent intent = new Intent();
+//                intent.setAction(android.content.Intent.ACTION_VIEW);
+//                intent.setDataAndType(Uri.parse("file://" + result), "image/*");
+//                context.startActivity(intent);
             }
 
         }
@@ -272,6 +289,56 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             statusText.setText("Opening a server socket");
         }
 
+    }
+
+    public static String getPing(InputStream inputStream) {
+        byte buf[] = new byte[1024];
+        int len;
+        try {
+            if ((len = inputStream.read(buf)) != -1) {
+                String s = new String(buf, StandardCharsets.UTF_8);
+                return s;
+            }
+        } catch (IOException e) {
+            Log.d(WiFiDirectActivity.TAG, e.toString());
+            return null;
+        }
+        return null;
+    }
+
+    public static String getPong(InputStream inputStream) {
+        byte buf[] = new byte[1024];
+        int len;
+        try {
+            if ((len = inputStream.read(buf)) != -1) {
+                String s = new String(buf, StandardCharsets.UTF_8);
+                return s;
+            }
+        } catch (IOException e) {
+            Log.d(WiFiDirectActivity.TAG, e.toString());
+            return null;
+        }
+        return null;
+    }
+
+    public static String sendPong(OutputStream out) {
+        byte buf[] = new byte[1024];
+        int len;
+        String pong = "pong";
+        buf = pong.getBytes(StandardCharsets.UTF_8);
+        len = pong.length();
+        String s = new String(buf, StandardCharsets.UTF_8);
+
+        Log.d(WiFiDirectActivity.TAG, "to send: "+s+", length = "+len);
+
+        try {
+            out.write(buf, 0, len);
+            out.close();
+        } catch (IOException e) {
+            Log.d(WiFiDirectActivity.TAG, e.toString());
+            return null;
+        }
+        return null;
     }
 
     public static boolean copyFile(InputStream inputStream, OutputStream out) {
@@ -291,4 +358,23 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         return true;
     }
 
+    public static String sendPing(OutputStream out) {
+        byte buf[] = new byte[1024];
+        int len;
+        String ping = "ping";
+        buf = ping.getBytes(StandardCharsets.UTF_8);
+        len = ping.length();
+        String s = new String(buf, StandardCharsets.UTF_8);
+
+        Log.d(WiFiDirectActivity.TAG, "to send: "+s+", length = "+len);
+
+        try {
+            out.write(buf, 0, len);
+            out.close();
+        } catch (IOException e) {
+            Log.d(WiFiDirectActivity.TAG, e.toString());
+            return null;
+        }
+        return null;
+    }
 }
