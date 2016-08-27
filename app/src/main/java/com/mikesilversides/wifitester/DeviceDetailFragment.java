@@ -34,6 +34,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.nio.charset.StandardCharsets;
 
@@ -254,7 +255,7 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
                 OutputStream outputstream = client.getOutputStream();
                 sendPong(outputstream);
 
-                serverSocket.close();
+                //serverSocket.close();
 
                 return s;
 //                return f.getAbsolutePath();
@@ -271,7 +272,8 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         @Override
         protected void onPostExecute(String result) {
             if (result != null) {
-                statusText.setText("text received: " + result);
+                //statusText.setText("text received: " + result);
+
 //                Intent intent = new Intent();
 //                intent.setAction(android.content.Intent.ACTION_VIEW);
 //                intent.setDataAndType(Uri.parse("file://" + result), "image/*");

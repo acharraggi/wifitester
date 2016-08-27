@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.FileNotFoundException;
@@ -73,8 +74,10 @@ public class FileTransferService extends IntentService {
                 DeviceDetailFragment.getPong(instream);
                 Log.d(WiFiDirectActivity.TAG, "Client: Data received");
                 long endTime = System.currentTimeMillis();
-                Log.d(WiFiDirectActivity.TAG, "ping time: "+(endTime-startTime)+"ms");
-                //TODO: display this in client, stop server from disconnecting so client can ping again.
+                String s = "ping: "+(endTime-startTime)+"ms";
+                Log.d(WiFiDirectActivity.TAG, s);
+                sendMessage(s);
+                //Toast.makeText(context.getApplicationContext(), s, Toast.LENGTH_SHORT).show();
 
             } catch (IOException e) {
                 Log.e(WiFiDirectActivity.TAG, e.getMessage());
@@ -92,5 +95,14 @@ public class FileTransferService extends IntentService {
             }
 
         }
+    }
+    // Send an Intent with an action named "custom-event-name". The Intent sent should
+// be received by the ReceiverActivity.
+    private void sendMessage(String s) {
+        Log.d("sender", "Broadcasting message");
+        Intent intent = new Intent("ping-time");
+        // You can also include some extra data.
+        intent.putExtra("message", s);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }
