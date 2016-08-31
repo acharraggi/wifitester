@@ -69,10 +69,11 @@ public class FileTransferService extends IntentService {
 //                DeviceDetailFragment.copyFile(is, stream);
                 long startTime = System.currentTimeMillis();
                 DeviceDetailFragment.sendPing(stream);
-                Log.d(WiFiDirectActivity.TAG, "Client: Data written");
+                Log.d(WiFiDirectActivity.TAG, "Client: ping sent");
 
                 DeviceDetailFragment.getPong(instream);
-                Log.d(WiFiDirectActivity.TAG, "Client: Data received");
+
+                Log.d(WiFiDirectActivity.TAG, "Client: pong received");
                 long endTime = System.currentTimeMillis();
                 String s = "ping: "+(endTime-startTime)+"ms";
                 Log.d(WiFiDirectActivity.TAG, s);

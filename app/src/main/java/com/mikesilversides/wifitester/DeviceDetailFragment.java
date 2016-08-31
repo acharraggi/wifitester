@@ -364,10 +364,14 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         byte buf[] = new byte[1024];
         int len;
         String ping = "ping";
+//        for(int i=0; i<8; i++){  //make it big
+//            ping = ping + ping;
+//        }
+
         buf = ping.getBytes(StandardCharsets.UTF_8);
+
         len = ping.length();
         String s = new String(buf, StandardCharsets.UTF_8);
-
         Log.d(WiFiDirectActivity.TAG, "to send: "+s+", length = "+len);
 
         try {
