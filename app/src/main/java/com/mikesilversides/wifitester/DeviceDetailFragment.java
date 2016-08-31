@@ -250,10 +250,14 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
 //                Log.d(WiFiDirectActivity.TAG, "server: copying files " + f.toString());
                 InputStream inputstream = client.getInputStream();
 //                copyFile(inputstream, new FileOutputStream(f));
-                s = getPing(inputstream);
+
+//                s = getPing(inputstream);
+                int len = getData(inputstream);
+                Log.e(WiFiDirectActivity.TAG, "received "+len+" bytes");
 
                 OutputStream outputstream = client.getOutputStream();
-                sendPong(outputstream);
+//                sendPong(outputstream);
+                sendAck(outputstream);
 
                 //serverSocket.close();
 
@@ -308,6 +312,22 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         return null;
     }
 
+    public static int getData(InputStream inputStream) {
+        byte buf[] = new byte[1024];
+        int len;
+        int bytesReceived = 0;
+        try {
+            while ((len = inputStream.read(buf)) != -1) {
+                String s = new String(buf, StandardCharsets.UTF_8);
+                bytesReceived = bytesReceived + len;
+            }
+        } catch (IOException e) {
+            Log.d(WiFiDirectActivity.TAG, e.toString());
+            return -1;
+        }
+        return bytesReceived;
+    }
+
     public static String getPong(InputStream inputStream) {
         byte buf[] = new byte[1024];
         int len;
@@ -321,6 +341,21 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
             return null;
         }
         return null;
+    }
+
+    public static String getAck(InputStream inputStream) {
+        byte buf[] = new byte[8];
+        int len;
+        String s = null;
+        try {
+            if ((len = inputStream.read(buf)) != -1) {
+                s = new String(buf, StandardCharsets.UTF_8);
+            }
+        } catch (IOException e) {
+            Log.d(WiFiDirectActivity.TAG, e.toString());
+            return null;
+        }
+        return s;
     }
 
     public static String sendPong(OutputStream out) {
@@ -343,6 +378,25 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         return null;
     }
 
+    public static String sendAck(OutputStream out) {
+        byte buf[] = new byte[8];
+        int len;
+        String pong = "ack";
+        buf = pong.getBytes(StandardCharsets.UTF_8);
+        len = pong.length();
+        String s = new String(buf, StandardCharsets.UTF_8);
+
+        Log.d(WiFiDirectActivity.TAG, "send ack: "+s+", length = "+len);
+
+        try {
+            out.write(buf, 0, len);
+            out.close();
+        } catch (IOException e) {
+            Log.d(WiFiDirectActivity.TAG, e.toString());
+            return null;
+        }
+        return null;
+    }
     public static boolean copyFile(InputStream inputStream, OutputStream out) {
         byte buf[] = new byte[1024];
         int len;
@@ -377,6 +431,32 @@ public class DeviceDetailFragment extends Fragment implements ConnectionInfoList
         try {
             out.write(buf, 0, len);
             out.close();
+        } catch (IOException e) {
+            Log.d(WiFiDirectActivity.TAG, e.toString());
+            return null;
+        }
+        return null;
+    }
+
+    public static String sendData(OutputStream out) {
+        byte buf[] = new byte[1024];
+        int len;
+        String ping = "data";
+        for(int i=0; i<8; i++){  //make it big
+            ping = ping + ping;
+        }
+
+        buf = ping.getBytes(StandardCharsets.UTF_8);
+        len = ping.length();
+
+        try {
+            //TODO: calling write like this seems to block after awhile. no errors noted, just doesn't finish the loop
+            for(int i=0; i<100; i++) {
+                out.write(buf, 0, len);
+                Log.d(WiFiDirectActivity.TAG, "sent "+len+" bytes. packet = "+i);
+            }
+            out.close();
+            Log.d(WiFiDirectActivity.TAG, "sendData complete");
         } catch (IOException e) {
             Log.d(WiFiDirectActivity.TAG, e.toString());
             return null;

@@ -67,15 +67,19 @@ public class FileTransferService extends IntentService {
 //                    Log.d(WiFiDirectActivity.TAG, e.toString());
 //                }
 //                DeviceDetailFragment.copyFile(is, stream);
-                long startTime = System.currentTimeMillis();
-                DeviceDetailFragment.sendPing(stream);
-                Log.d(WiFiDirectActivity.TAG, "Client: ping sent");
 
+                long startTime = System.currentTimeMillis();
+//                DeviceDetailFragment.sendPing(stream);
+//                Log.d(WiFiDirectActivity.TAG, "Client: ping sent");
+                DeviceDetailFragment.sendData(stream);
+                Log.d(WiFiDirectActivity.TAG, "Client: data sent");
+
+//                DeviceDetailFragment.getPong(instream);
                 DeviceDetailFragment.getPong(instream);
 
-                Log.d(WiFiDirectActivity.TAG, "Client: pong received");
+                Log.d(WiFiDirectActivity.TAG, "Client: ack received");
                 long endTime = System.currentTimeMillis();
-                String s = "ping: "+(endTime-startTime)+"ms";
+                String s = "data elapsed time: "+(endTime-startTime)+"ms";
                 Log.d(WiFiDirectActivity.TAG, s);
                 sendMessage(s);
                 //Toast.makeText(context.getApplicationContext(), s, Toast.LENGTH_SHORT).show();
